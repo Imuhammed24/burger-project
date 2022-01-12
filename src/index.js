@@ -1,12 +1,22 @@
 import React from 'react';
+import axios from 'axios';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
+import App from './containers/App/App';
 import reportWebVitals from './reportWebVitals';
+import {BrowserRouter} from "react-router-dom";
+
+axios.defaults.baseURL = 'https://burger-builder-3aa92-default-rtdb.firebaseio.com/';
+
+const app = (
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>
+);
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+      {app}
   </React.StrictMode>,
   document.getElementById('root')
 );
