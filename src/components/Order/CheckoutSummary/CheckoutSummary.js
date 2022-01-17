@@ -2,7 +2,7 @@ import React from "react";
 import Button from "../../UI/Button/Button";
 import Burger from "../../Burger/Burger";
 import classes from "./CheckoutSummary.module.css";
-import {Route, withRouter} from "react-router-dom";
+import {withRouter} from "react-router-dom";
 import Aux from "../../../hoc/Aux";
 
 const checkoutSummary = props => {
