@@ -1,21 +1,36 @@
-import React from "react";
+import React, {Component} from "react";
 import Layout from "../../hoc/Layout/Layout";
-import BurgerBuilder from "../BurgerBuilder/BurgerBuilder";
-import {Switch} from "react-router-dom";
-import {Route} from "react-router-dom";
-import Checkout from "../Checkout/Checkout";
-import Orders from "../Orders/Orders";
+import {connect} from "react-redux";
+import AuthRoutes from "../../components/Routes/AuthRoutes";
+import AnonymousRoutes from "../../components/Routes/AnonymousRoutes";
+import {checkAuthState} from "../../store/actions/auth";
 
-function App() {
-  return (
-      <Layout>
-          <Switch>
-              <Route path="/orders" component={Orders} />
-              <Route path="/checkout" component={Checkout} />
-              <Route path="/" exact component={BurgerBuilder} />
-          </Switch>
-      </Layout>
-  );
+
+class App extends Component {
+    componentDidMount() {
+        this.props.onCheckAuthState()
+    }
+
+    render() {
+        let routes = this.props.isAuthenticated ? <AuthRoutes /> : <AnonymousRoutes />
+        return (
+            <Layout>
+                {routes}
+            </Layout>
+        );
+    }
 }
 
-export default App;
+const mapStateToProps = state => {
+    return {
+        isAuthenticated: state.auth.token !== null
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        onCheckAuthState: () => dispatch(checkAuthState())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

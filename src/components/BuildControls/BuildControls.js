@@ -27,8 +27,8 @@ const BuildControls = props => {
             <p>Current Price: {props.totalPrice.toFixed(2)}</p>
             {transformedControls}
             {props.purchasableStatus ?
-                <button onClick={props.checkoutClicked} className={classes.OrderButton}>Checkout</button> :
-                <button disabled onClick={props.checkoutClicked} className={classes.OrderButton}>Checkout</button>
+                <button onClick={props.checkoutClicked} className={classes.OrderButton}>{props.isAuthenticated ? 'Checkout' : 'SIGN IN'}</button> :
+                <button disabled onClick={props.checkoutClicked} className={classes.OrderButton}>{props.isAuthenticated ? 'Checkout' : 'SIGN IN'}</button>
             }
         </div>
     );

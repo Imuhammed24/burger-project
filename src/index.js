@@ -7,15 +7,18 @@ import {Provider} from "react-redux";
 import thunk from "redux-thunk";
 import {applyMiddleware} from "redux";
 import App from './containers/App/App';
-import {order} from "./store/Order";
-import {burgerBuilder} from "./store/BurgerBuilder";
+import {order} from "./store/reducers/Order";
+import {burgerBuilder} from "./store/reducers/BurgerBuilder";
 import reportWebVitals from './reportWebVitals';
 import {BrowserRouter} from "react-router-dom";
+import auth from "./store/reducers/auth";
 
 axios.defaults.baseURL = 'https://burger-builder-3aa92-default-rtdb.firebaseio.com/';
 
 const rootReducer = combineReducers({
-    order: order, burgerBuilder: burgerBuilder
+    order: order,
+    burgerBuilder: burgerBuilder,
+    auth: auth,
 })
 
 const store = createStore(rootReducer, applyMiddleware(thunk))

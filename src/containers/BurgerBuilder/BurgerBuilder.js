@@ -7,7 +7,7 @@ import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
 import Backdrop from "../../components/UI/Backdrop/Backdrop";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import {connect} from "react-redux";
-import * as actionTypes from '../../actions/';
+import * as actionTypes from '../../store/actions/';
 
 
 class BurgerBuilder extends Component {
@@ -28,13 +28,19 @@ class BurgerBuilder extends Component {
     }
 
     componentDidMount() {
-        this.props.onFetchIngredients()
+        if (!this.props.isAuthenticated && !this.props.purchasable) {
+            this.props.onFetchIngredients()
+        }
     }
 
     purchaseHandler = () => {
         this.setState(prevState => {
             return {purchasing: true}
         })
+
+        if (!this.props.isAuthenticated){
+            this.props.history.replace("/auth")
+        }
     }
 
     purchaseCancelHandler = () => {
@@ -80,6 +86,7 @@ class BurgerBuilder extends Component {
                             disabledStatus={disabledStatus}
                             addIngredientHandler={this.props.onAddIngredient}
                             removeIngredientHandler={this.props.onRemoveIngredient}
+                            isAuthenticated={this.props.isAuthenticated}
                             purchasableStatus={this.props.purchasable}
                             totalPrice={this.props.totalPrice}
                             checkoutClicked={this.purchaseHandler}/>}
@@ -89,6 +96,7 @@ class BurgerBuilder extends Component {
 
 const mapStateToProps = state => {
     return {
+        isAuthenticated: state.auth.token !== null,
         ingredients: state.burgerBuilder.ingredients,
         error: state.burgerBuilder.error,
         purchasable: state.burgerBuilder.purchasable,

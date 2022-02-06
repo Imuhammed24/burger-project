@@ -1,8 +1,13 @@
 import * as actionTypes from "../actions/actionTypes";
-import {updateObject} from "../utils/updateObject";
+import {updateObject} from "../../utils/updateObject";
 
 const initialState = {
-    ingredients: {}, totalPrice: 4, pulledIngredients: false, purchasable: false, purchasing: false, error: false,
+    ingredients: {},
+    totalPrice: 4,
+    pulledIngredients: false,
+    purchasable: false,
+    purchasing: false,
+    error: false,
 }
 
 const INGREDIENTS_PRICES = {
@@ -11,11 +16,11 @@ const INGREDIENTS_PRICES = {
 
 const fetchIngredientsSuccess = (state, action) => {
     return updateObject(state, {
-        ingredients: action.ingredients, totalPrice: 4, pulledIngredients: true
+        ingredients: action.ingredients, totalPrice: 4, pulledIngredients: true, purchasable: false, purchasing: false
     });
 }
 const fetchIngredientsFailed = (state, action) => {
-    return updateObject(state, {error: true});
+    return updateObject(state, {error: action.error});
 }
 const addIngredient = (state, action) => {
     // update ing
@@ -31,6 +36,7 @@ const addIngredient = (state, action) => {
         ingredients: updatedIngredients,
         totalPrice: updatedTotalPrice,
         purchasable: purchasableUpdate,
+        purchasing: true
     });
 }
 const removeIngredient = (state, action) => {
@@ -38,13 +44,15 @@ const removeIngredient = (state, action) => {
     const newIngredientValue = state.ingredients[action.ingredientName] - 1;
     const newTotalPrice = state.totalPrice - INGREDIENTS_PRICES[action.ingredientName];
     let removePurchasableUpdate = newTotalPrice > 4;
+    let updatedPurchasing = newTotalPrice > 4;
     // update ingredients object
     const newIngredients = updateObject(state.ingredients, {[action.ingredientName]: newIngredientValue})
     // update state
     return updateObject(state, {
         purchasable: removePurchasableUpdate,
         ingredients: newIngredients,
-        totalPrice: newTotalPrice
+        totalPrice: newTotalPrice,
+        purchasing: updatedPurchasing
     });
 }
 

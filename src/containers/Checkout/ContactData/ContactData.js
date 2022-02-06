@@ -5,8 +5,14 @@ import axios from "axios";
 import {withRouter} from "react-router-dom";
 import Spinner from "../../../components/UI/Spinner/Spinner";
 import Input from "../../../components/UI/Input/Input";
+import {connect} from "react-redux";
+import {addOrder} from "../../../store/actions/order";
+import {fetchIngredients} from "../../../store/actions";
+import {updateObject} from "../../../utils/updateObject";
+import {checkValidity} from "../../../utils/validateForm";
 
-class ContactData extends Component{
+
+class ContactData extends Component {
     state = {
         orderForm: {
             name: {
@@ -89,28 +95,12 @@ class ContactData extends Component{
         error: false
     }
 
-    checkValidity(value, rules){
-        let is_valid = true;
-        if (rules==={}){
-            return is_valid;
-        }
-
-        if (rules.required){
-            is_valid = value.trim() !== "" && is_valid;
-        } if (rules.minLength){
-            is_valid = value.length >= rules.minLength && is_valid;
-        } if (rules.maxLength){
-            is_valid = value.length <= rules.maxLength && is_valid;
-        }
-        return is_valid;
-    }
-
-    orderSubmitHandler = (event) =>{
+    orderSubmitHandler = (event) => {
         event.preventDefault();
         this.setState({purchasing: true})
 
         let formData = {}
-        for (let formElementIdentifier in this.state.orderForm){
+        for (let formElementIdentifier in this.state.orderForm) {
             formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value
         }
 
@@ -118,9 +108,14 @@ class ContactData extends Component{
             contactDetails: formData,
             ingredients: this.props.ingredients,
             orderTotal: this.props.totalPrice,
+            userId: this.props.userId
         }
 
-        axios.post('/orders.json', orderData).then(response => {
+        // this.props.onSubmitOrder(orderData)
+        let queryParam = '?auth=' + this.props.token;
+        axios.post('/orders.json' + queryParam, orderData).then(response => {
+            this.props.fetchIngredients()
+            this.props.onSubmitOrder(updateObject({...orderData}, {key: response.data.name}))
             this.setState(prevState => {
                 return {purchasing: false}
             })
@@ -134,12 +129,12 @@ class ContactData extends Component{
     inputChangedHandler = (event, elementIdentifier) => {
         let updatedOrderForm = {...this.state.orderForm}
         updatedOrderForm[elementIdentifier].value = event.target.value;
-        updatedOrderForm[elementIdentifier].valid = this.checkValidity(updatedOrderForm[elementIdentifier].value, updatedOrderForm[elementIdentifier].validation)
+        updatedOrderForm[elementIdentifier].valid = checkValidity(updatedOrderForm[elementIdentifier].value, updatedOrderForm[elementIdentifier].validation)
         updatedOrderForm[elementIdentifier].shouldValidate = true
 
         let validForm = true;
-        for (let formElement in updatedOrderForm){
-            validForm = this.checkValidity(updatedOrderForm[formElement].value, updatedOrderForm[formElement].validation) && validForm;
+        for (let formElement in updatedOrderForm) {
+            validForm = checkValidity(updatedOrderForm[formElement].value, updatedOrderForm[formElement].validation) && validForm;
         }
 
         this.setState({orderForm: updatedOrderForm, orderFormValid: validForm});
@@ -148,17 +143,17 @@ class ContactData extends Component{
 
     render() {
         let formElementsArray = []
-        for (let key in this.state.orderForm){
+        for (let key in this.state.orderForm) {
             formElementsArray.push({
                 id: key,
                 config: this.state.orderForm[key]
             })
         }
 
-        let form = <Spinner />
-        if (this.state.error){
+        let form = <Spinner/>
+        if (this.state.error) {
             form = <h3>Something went wrong</h3>
-        }else if(!this.state.error && !this.state.purchasing) {
+        } else if (!this.state.error && !this.state.purchasing) {
             form = (
                 <form action="">
                     {formElementsArray.map(formElement => (
@@ -169,7 +164,7 @@ class ContactData extends Component{
                                valid={formElement.config.valid}
                                shouldvalidate={formElement.config.shouldValidate}
                                elementconfig={formElement.config.elementConfig}
-                               changed={(event)=>this.inputChangedHandler(event, formElement.id)}
+                               changed={(event) => this.inputChangedHandler(event, formElement.id)}
                         />
                     ))}
                     <Button className={classes.Input}
@@ -188,4 +183,18 @@ class ContactData extends Component{
     }
 }
 
-export default withRouter(ContactData);
+const mapStateToProps = state => {
+    return {
+        token: state.auth.token,
+        userId: state.auth.userId
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return{
+        onSubmitOrder: (orderData) => dispatch(addOrder(orderData)),
+        fetchIngredients: () => dispatch(fetchIngredients())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (withRouter(ContactData));
